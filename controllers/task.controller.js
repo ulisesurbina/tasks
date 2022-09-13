@@ -34,9 +34,7 @@ const getStatusTasks = async (req, res) => {
         const { status } = req.params;
         const string = status.toLowerCase();
         const valueStat = ["active", "completed", "late", "cancelled"];
-        if (
-            valueStat.includes(string)
-        ) {
+        if (valueStat.includes(string)) {
             const task = await Task.findAll({
                 attributes: [
                     "id",
