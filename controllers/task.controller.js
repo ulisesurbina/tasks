@@ -33,6 +33,19 @@ const getStatusTasks = async (req, res) => {
     try {
         const { status } = req.params;
         const task = await Task.findAll({
+            attributes: [
+                "id",
+                "userId",
+                "title",
+                "limitDate",
+                "startDate",
+                "finishDate",
+                "status",
+            ],
+            include: {
+                model: User,
+                attributes: ["id", "name", "email", "status"],
+            },
             where: { status },
         });
         if (!task) {
@@ -77,7 +90,13 @@ const updateTask = async (req, res) => {
     try {
         const { finishDate } = req.body;
         const { task } = req;
-        await task.update({ finishDate, status: "completed" });
+
+        await task.update({ finishDate });
+        if (task.limitDate >= task.finishDate) {
+            await task.update({ status: "completed" });
+        } else if (task.limitDate < task.finishDate) {
+            await task.update({ status: "late" });
+        }
         res.status(200).json({
             status: "success",
             data: { task },
