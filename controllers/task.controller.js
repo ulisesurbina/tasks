@@ -32,35 +32,47 @@ const getAllTasks = async (req, res) => {
 const getStatusTasks = async (req, res) => {
     try {
         const { status } = req.params;
-        const task = await Task.findAll({
-            attributes: [
-                "id",
-                "userId",
-                "title",
-                "limitDate",
-                "startDate",
-                "finishDate",
-                "status",
-            ],
-            include: {
-                model: User,
-                attributes: ["id", "name", "email", "status"],
-            },
-            where: { status },
-        });
-        if (!task) {
+        const string = status.toLowerCase();
+        const valueStat = ["active", "completed", "late", "cancelled"];
+        if (
+            valueStat.includes(string)
+        ) {
+            const task = await Task.findAll({
+                attributes: [
+                    "id",
+                    "userId",
+                    "title",
+                    "limitDate",
+                    "startDate",
+                    "finishDate",
+                    "status",
+                ],
+                include: {
+                    model: User,
+                    attributes: ["id", "name", "email", "status"],
+                },
+                where: { status },
+            });
+            if (!task) {
+                return res.status(404).json({
+                    status: "error",
+                    message:
+                        "Status of task not found. Acepted status: completed, active, late, cancelled",
+                });
+            }
+            res.status(200).json({
+                status: "success",
+                data: {
+                    task,
+                },
+            });
+        } else {
             return res.status(404).json({
                 status: "error",
                 message:
                     "Status of task not found. Acepted status: completed, active, late, cancelled",
             });
         }
-        res.status(200).json({
-            status: "success",
-            data: {
-                task,
-            },
-        });
     } catch (error) {
         console.log(error);
     }
